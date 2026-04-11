@@ -8,7 +8,7 @@ const fs = require("fs");
 exports.sendPendingPOReport = async function () {
   console.log(`Starting sendPendingPOReport at ${moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss")}`);
   try {
-   const ReportDate = moment(new Date()).format("YYYY-MM-DD");
+    const ReportDate = moment(new Date()).format("YYYY-MM-DD");
     let fileName = `files/excel/PENDING_PO_ALL${Math.floor(Math.random() * (999 - 100 + 1)) + 100}.csv`;
 
     console.log(`Generating pending PO report for date: ${ReportDate}, file: ${fileName}`);
@@ -64,10 +64,7 @@ exports.sendPendingPOReport = async function () {
 
     for (let item of stmt) {
       let duedate = item.po_duedate === "" ? "--" : item.po_duedate;
-      let cost_center =
-        item.po_cost_center && item.po_cost_center !== "--" && item.po_cost_center !== ""
-          ? `${item.cost_center_name || "N/A"} (${item.cost_center_short_name || "N/A"})`
-          : "N/A";
+      let cost_center = item.po_cost_center && item.po_cost_center !== "--" && item.po_cost_center !== "" ? `${item.cost_center_name || "N/A"} (${item.cost_center_short_name || "N/A"})` : "N/A";
 
       finalResult.push({
         REG_DATE: moment(item.po_full_date).tz("Asia/Kolkata").format("DD-MM-YYYY") || "N/A",
@@ -75,7 +72,7 @@ exports.sendPendingPOReport = async function () {
         COMPONENT_NAME: item.c_name || "N/A",
         ORDERED_QTY: Number(item.po_order_qty) || 0,
         INWARD_QTY: Number(item.Inward) || 0,
-        PENDING_QTY: (Number(item.po_order_qty) - Number(item.Inward)) || 0,
+        PENDING_QTY: Number(item.po_order_qty) - Number(item.Inward) || 0,
         VENDOR_NAME: item.po_vendor_name || "N/A",
         VENDOR_CODE: item.po_vendor_reg_id || "N/A",
         DUE_DATE: duedate,
@@ -102,7 +99,7 @@ exports.sendPendingPOReport = async function () {
       {
         header: ["A"],
         skipHeader: true,
-      }
+      },
     );
 
     ReportHeader["!merges"] = [
@@ -121,7 +118,7 @@ exports.sendPendingPOReport = async function () {
       {
         skipHeader: true,
         origin: "A2",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -134,7 +131,7 @@ exports.sendPendingPOReport = async function () {
       {
         skipHeader: true,
         origin: "A3",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -162,7 +159,7 @@ exports.sendPendingPOReport = async function () {
       {
         skipHeader: true,
         origin: "A5",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(ReportHeader, finalResult, { skipHeader: true, origin: "A6" });
@@ -187,11 +184,11 @@ exports.sendPendingPOReport = async function () {
     ];
 
     await sendMail(
- "aman.mandal@mscorpres.in",
+      "aman.mandal@mscorpres.in",
       ["aman.mandal@mscorpres.in"],
       "Pending PO Report [File Ready for download] Ref:" + randomNumber(),
-      htmlTemplate("User", new Date(), "Pending PO", "https://socketv2.mscapi.live/" + fileName),
-      attachment
+      htmlTemplate("User", new Date(), "Pending PO", "https://vans.ws.mscorpres.com" + fileName),
+      attachment,
     );
     console.log(`Email sent to aman.mandal@mscorpres.in with attachment ${fileName}`);
   } catch (error) {
@@ -242,22 +239,22 @@ exports.sendPendingPOReport = async function () {
 
 //     // Fetch pending POs for the date range using MariaDB syntax
 //     const query = `
-//       SELECT 
-//         *, 
-//         branches.branch_name, 
-//         COALESCE(SUM(\`po_purchase_req\`.\`po_order_qty\`), 0) AS totalReq_Qty, 
-//         COALESCE(SUM(\`po_purchase_req\`.\`po_inward_qty\`), 0) AS Inward 
-//       FROM \`po_purchase_req\` 
-//       LEFT JOIN \`components\` ON \`po_purchase_req\`.\`po_part_no\` = \`components\`.\`component_key\` 
-//       LEFT JOIN \`units\` ON \`units\`.\`units_id\` = \`components\`.\`c_uom\` 
-//       LEFT JOIN \`admin_login\` ON \`admin_login\`.\`CustID\` = \`po_purchase_req\`.\`po_insert_by\` 
-//       LEFT JOIN \`cost_center\` ON \`po_purchase_req\`.\`po_cost_center\` = \`cost_center\`.\`cost_center_key\` 
-//       LEFT JOIN \`branches\` ON \`branches\`.\`branch_code\` = \`po_purchase_req\`.\`company_branch\` 
-//       LEFT JOIN \`ims_currency\` ON \`ims_currency\`.\`currency_id\` = \`po_purchase_req\`.\`po_currency\` 
-//       WHERE \`components\`.\`c_type\` = 'R' 
-//       AND (\`po_purchase_req\`.\`po_status\` = 'A' OR \`po_purchase_req\`.\`po_inward_qty\` != '0') 
-//       AND DATE_FORMAT(\`po_purchase_req\`.\`po_full_date\`, '%Y-%m-%d') BETWEEN :startDate AND :endDate 
-//       GROUP BY \`po_purchase_req\`.\`po_part_no\`, \`po_purchase_req\`.\`po_transaction\` 
+//       SELECT
+//         *,
+//         branches.branch_name,
+//         COALESCE(SUM(\`po_purchase_req\`.\`po_order_qty\`), 0) AS totalReq_Qty,
+//         COALESCE(SUM(\`po_purchase_req\`.\`po_inward_qty\`), 0) AS Inward
+//       FROM \`po_purchase_req\`
+//       LEFT JOIN \`components\` ON \`po_purchase_req\`.\`po_part_no\` = \`components\`.\`component_key\`
+//       LEFT JOIN \`units\` ON \`units\`.\`units_id\` = \`components\`.\`c_uom\`
+//       LEFT JOIN \`admin_login\` ON \`admin_login\`.\`CustID\` = \`po_purchase_req\`.\`po_insert_by\`
+//       LEFT JOIN \`cost_center\` ON \`po_purchase_req\`.\`po_cost_center\` = \`cost_center\`.\`cost_center_key\`
+//       LEFT JOIN \`branches\` ON \`branches\`.\`branch_code\` = \`po_purchase_req\`.\`company_branch\`
+//       LEFT JOIN \`ims_currency\` ON \`ims_currency\`.\`currency_id\` = \`po_purchase_req\`.\`po_currency\`
+//       WHERE \`components\`.\`c_type\` = 'R'
+//       AND (\`po_purchase_req\`.\`po_status\` = 'A' OR \`po_purchase_req\`.\`po_inward_qty\` != '0')
+//       AND DATE_FORMAT(\`po_purchase_req\`.\`po_full_date\`, '%Y-%m-%d') BETWEEN :startDate AND :endDate
+//       GROUP BY \`po_purchase_req\`.\`po_part_no\`, \`po_purchase_req\`.\`po_transaction\`
 //       HAVING (SUM(\`po_purchase_req\`.\`po_order_qty\`) - SUM(\`po_purchase_req\`.\`po_inward_qty\`)) > 0
 //       ORDER BY \`po_purchase_req\`.\`ID\` DESC
 //     `;
@@ -401,7 +398,7 @@ exports.sendPendingPOReport = async function () {
 //       "aman.mandal@mscorpres.in",
 //       "",
 //       "Pending PO Report [File Ready for download] Ref:" + randomNumber(),
-//       htmlTemplate("User", new Date(), "Pending PO", "https://socketv2.mscapi.live" + fileName),
+//       htmlTemplate("User", new Date(), "Pending PO", "https://https://vans.ws.mscorpres.com" + fileName),
 //       attachment
 //     );
 //     console.log(`Email sent to aman.mandal@mscorpres.in with attachment ${fileName}`);

@@ -25,15 +25,8 @@ var https_options = {
   ca: fs.readFileSync("./certificate/ca_bundle.crt"),
 };
 
-if (process.env.STAGE === "production") {
-  global.oakter_db_tally = process.env.DB_FIN_DBNAME;
-  global.oakter_db_invt = process.env.DB_INVT_DBNAME;
-  global.oakter_db_other = process.env.DB_OTHER_DBNAME;
-} else {
-  global.oakter_db_tally = process.env.TEST_DB_FIN_DBNAME;
-  global.oakter_db_invt = process.env.TEST_DB_INVT_DBNAME;
-  global.oakter_db_other = process.env.TEST_DB_OTHER_DBNAME;
-}
+global.vans_db_ims = process.env.DB_VANS_IMS_DATABASE;
+global.vans_db_other = process.env.DB_VANS_OTHER_DATABASE;
 
 var app = express();
 

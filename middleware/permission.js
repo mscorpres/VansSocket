@@ -1,4 +1,4 @@
-const { invtDB, otherDB } = require("./../config/db/connection");
+const { vansDB, vansOtherDB } = require("./../config/db/connection");
 var url = require("url");
 var jwt = require("jsonwebtoken");
 
@@ -7,9 +7,9 @@ module.exports.isPermission = async function (req, res, next) {
   next();
   return;
 
-  // let stmt = await otherDB.query("SELECT * FROM `ims_permission2` WHERE `user_id` = :user_id AND page_id = :page_id ", {
+  // let stmt = await vansOtherDB.query("SELECT * FROM `ims_permission2` WHERE `user_id` = :user_id AND page_id = :page_id ", {
   // 	replacements: { user_id: req.logedINUser, page_id: req.page_id },
-  // 	type: otherDB.QueryTypes.SELECT,
+  // 	type: vansOtherDB.QueryTypes.SELECT,
   //   });
   //   if (stmt.length > 0) {
   // 	next();
@@ -18,12 +18,12 @@ module.exports.isPermission = async function (req, res, next) {
   // 	return res.json({ code: 500, status: "error", message: { msg: "seems like you are an unauthorized user, so we are noting your action as spam" } });
   //   }
 
-  let stmt1 = await invtDB.query("SELECT * FROM `admin_login` WHERE `CustID` = :user_id AND `company_id` = :company_id", { replacements: { user_id: req.logedINUser, company_id: req.logedINCompany }, type: invtDB.QueryTypes.SELECT });
+  let stmt1 = await vansDB.query("SELECT * FROM `admin_login` WHERE `CustID` = :user_id AND `company_id` = :company_id", { replacements: { user_id: req.logedINUser, company_id: req.logedINCompany }, type: vansDB.QueryTypes.SELECT });
   if (stmt1.length > 0) {
     if (stmt1[0].login_status == "0") {
       return res.json({ code: 500, status: "error", type: "userblocked", message: { msg: "seems like your account is marked as suspend, please contact your administrator for further information" } });
     } else {
-      let stmt2 = await otherDB.query("SELECT * FROM `ims_company` WHERE `company_id` = :company_id", { replacements: { company_id: req.logedINCompany }, type: otherDB.QueryTypes.SELECT });
+      let stmt2 = await vansOtherDB.query("SELECT * FROM `ims_company` WHERE `company_id` = :company_id", { replacements: { company_id: req.logedINCompany }, type: vansOtherDB.QueryTypes.SELECT });
       if (stmt2.length > 0) {
         if (stmt2[0].company_server !== "ON" && stmt1[0].type !== "developer") {
           return res.json({
@@ -57,12 +57,12 @@ module.exports.isPermission = async function (req, res, next) {
       } else if (stmt1[0].isEmailConfirmed == "0") {
         return res.json({ code: 403, message: "Please confirm your mobile number", error: "warning", url: "https://www.google.com", demandPermission: "0" });
       } else {
-        let stmt2 = await otherDB.query("SELECT * FROM `ims_permission` WHERE `page_id` = :page_id AND `username` = :user_id", {
+        let stmt2 = await vansOtherDB.query("SELECT * FROM `ims_permission` WHERE `page_id` = :page_id AND `username` = :user_id", {
           replacements: {
             page_id: page_id,
             user_id: user_id,
           },
-          type: otherDB.QueryTypes.SELECT,
+          type: vansOtherDB.QueryTypes.SELECT,
         });
         if (stmt2.length > 0) {
           let jsonData = JSON.parse(stmt2[0].permission);

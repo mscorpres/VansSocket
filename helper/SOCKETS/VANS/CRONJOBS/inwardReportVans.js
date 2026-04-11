@@ -8,12 +8,11 @@ const fs = require("fs");
 exports.sendIwardReport = async function () {
   console.log(`Starting sendIwardReport at ${moment().format("YYYY-MM-DD HH:mm:ss")}`);
   try {
-    const ReportDate = moment(new Date()).subtract(1, 'days').format("YYYY-MM-DD");
+    const ReportDate = moment(new Date()).subtract(1, "days").format("YYYY-MM-DD");
     let fileName = `files/excel/INWARD${Math.floor(Math.random() * (999 - 100 + 1)) + 100}.csv`;
 
     console.log(`Generating report for date: ${ReportDate}, file: ${fileName}`);
 
-    
     const dir = "files/excel";
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -27,7 +26,7 @@ exports.sendIwardReport = async function () {
       {
         replacements: { date: ReportDate },
         type: vansDB.QueryTypes.SELECT,
-      }
+      },
     );
     console.log(`Fetched ${stmt.length} records from rm_transaction`);
 
@@ -74,7 +73,7 @@ exports.sendIwardReport = async function () {
       {
         header: ["A"],
         skipHeader: true,
-      }
+      },
     );
 
     ReportHeader["!merges"] = [
@@ -93,7 +92,7 @@ exports.sendIwardReport = async function () {
       {
         skipHeader: true,
         origin: "A2",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -106,7 +105,7 @@ exports.sendIwardReport = async function () {
       {
         skipHeader: true,
         origin: "A3",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -127,7 +126,7 @@ exports.sendIwardReport = async function () {
       {
         skipHeader: true,
         origin: "A5",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(ReportHeader, finalResult, { skipHeader: true, origin: "A6" });
@@ -146,10 +145,10 @@ exports.sendIwardReport = async function () {
 
     await sendMail(
       "sales@vans-electronics.com",
-      ["aman.mandal@mscorpres.in","neetu@vans-electronics.com","storevans@mscorpres.com","store@vans-electronics.com","purchase@vans-electronics.com"],
+      ["aman.mandal@mscorpres.in", "neetu@vans-electronics.com", "storevans@mscorpres.com", "store@vans-electronics.com", "purchase@vans-electronics.com"],
       "Inward Report [File Ready for download] Ref:" + randomNumber(),
-      htmlTemplate("User", new Date(), "Inward", "https://socketv2.mscapi.live/" + fileName),
-      attachment
+      htmlTemplate("User", new Date(), "Inward", "https://vans.ws.mscorpres.com" + fileName),
+      attachment,
     );
     console.log(`Email sent to sales@vans-electronics.com in with attachment ${fileName}`);
   } catch (error) {

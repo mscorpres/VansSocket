@@ -1,7 +1,7 @@
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const { invtDB, otherDB } = require("./../config/db/connection");
+const { vansDB, vansOtherDB } = require("./../config/db/connection");
 
 exports.myFunction = function (io) {
   io.on("connection", (socket) => {
@@ -32,19 +32,19 @@ exports.myFunction = function (io) {
         let token_res;
         token_res = await verifyToken(`${socket.handshake.auth.token}`);
         let user_id = token_res.crn_id;
-        let stmt1 = await invtDB.query("SELECT * FROM `admin_login` WHERE `CustID` = :user_id", { replacements: { user_id: user_id }, type: invtDB.QueryTypes.SELECT });
+        let stmt1 = await vansDB.query("SELECT * FROM `admin_login` WHERE `CustID` = :user_id", { replacements: { user_id: user_id }, type: vansDB.QueryTypes.SELECT });
         if (stmt1.length > 0) {
           if (stmt1[0].isMobileConfirmed == "0") {
             return io.emit("permission", { code: 403, message: "Please confirm your mobile number", error: "warning", url: "https://www.google.com", demandPermission: "0" });
           } else if (stmt1[0].isEmailConfirmed == "0") {
             return io.emit("permission", { code: 403, message: "Please confirm your mobile number", error: "warning", url: "https://www.google.com", demandPermission: "0" });
           } else {
-            let stmt2 = await otherDB.query("SELECT * FROM `ims_permission` WHERE `page_id` = :page_id AND `username` = :user_id", {
+            let stmt2 = await vansOtherDB.query("SELECT * FROM `ims_permission` WHERE `page_id` = :page_id AND `username` = :user_id", {
               replacements: {
                 page_id: page_id,
                 user_id: user_id,
               },
-              type: otherDB.QueryTypes.SELECT,
+              type: vansOtherDB.QueryTypes.SELECT,
             });
             if (stmt2.length > 0) {
               let jsonData = JSON.parse(stmt2[0].permission);

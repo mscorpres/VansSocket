@@ -7,9 +7,9 @@ const fs = require("fs");
 
 exports.sendDispatchedInvoicedReport = async function () {
   try {
-    const ReportDate = moment(new Date()).subtract(1, 'days').format("YYYY-MM-DD");
+    const ReportDate = moment(new Date()).subtract(1, "days").format("YYYY-MM-DD");
     let fileName = `files/excel/DISPATCH_INVOICED_${Math.floor(Math.random() * (999 - 100 + 1)) + 100}.csv`;
-    
+
     const dir = "files/excel";
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -49,7 +49,7 @@ exports.sendDispatchedInvoicedReport = async function () {
       {
         replacements: { date: ReportDate },
         type: vansDB.QueryTypes.SELECT,
-      }
+      },
     );
     console.log(`Fetched ${stmt.length} invoiced shipments`);
 
@@ -68,12 +68,12 @@ exports.sendDispatchedInvoicedReport = async function () {
         {
           replacements: { pickslip_no: shipment.pickslip_id },
           type: vansDB.QueryTypes.SELECT,
-        }
+        },
       );
 
       // Group by component and sum quantities
       let componentMap = new Map();
-      
+
       for (let material of material_details) {
         let key = material.components_id;
         if (!componentMap.has(key)) {
@@ -82,7 +82,7 @@ exports.sendDispatchedInvoicedReport = async function () {
             c_name: material.c_name,
             c_specification: material.c_specification,
             total_qty: 0,
-            locations: []
+            locations: [],
           });
         }
         let component = componentMap.get(key);
@@ -95,9 +95,7 @@ exports.sendDispatchedInvoicedReport = async function () {
       // Add one row per component with total quantity
       for (let [componentId, component] of componentMap) {
         finalResult.push({
-          DATETIME: shipment.so_inv_create_dt 
-            ? moment(shipment.so_inv_create_dt).format("DD-MM-YYYY HH:mm:ss") 
-            : "N/A",
+          DATETIME: shipment.so_inv_create_dt ? moment(shipment.so_inv_create_dt).format("DD-MM-YYYY HH:mm:ss") : "N/A",
           PO_NUMBER: shipment.po_number || "N/A",
           INVOICE_NO: shipment.ship_invoice_no || "N/A",
           BILL_TO: `${shipment.so_bill_to_address1 || ""} ${shipment.so_bill_to_address2 || ""}`.trim() || "N/A",
@@ -107,8 +105,8 @@ exports.sendDispatchedInvoicedReport = async function () {
           DESCRIPTION: component.c_specification || "N/A",
           QUANTITY: component.total_qty,
           DOCKET_NUMBER: shipment.dispatch_doc_no || "N/A",
-          TRANSPORTER_DETAILS: shipment.transporterName 
-            ? `${shipment.transporterName} | ${shipment.transporter_mode || 'N/A'} | ${shipment.vehicle_type || 'N/A'} | ${shipment.vehicle_no || 'N/A'}` 
+          TRANSPORTER_DETAILS: shipment.transporterName
+            ? `${shipment.transporterName} | ${shipment.transporter_mode || "N/A"} | ${shipment.vehicle_type || "N/A"} | ${shipment.vehicle_no || "N/A"}`
             : "N/A",
           PICKSLIP_NO: shipment.pickslip_id || "N/A",
           COST_CENTER: shipment.cost_center_name || "N/A",
@@ -131,7 +129,7 @@ exports.sendDispatchedInvoicedReport = async function () {
       {
         header: ["A"],
         skipHeader: true,
-      }
+      },
     );
 
     ReportHeader["!merges"] = [
@@ -150,7 +148,7 @@ exports.sendDispatchedInvoicedReport = async function () {
       {
         skipHeader: true,
         origin: "A2",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -163,7 +161,7 @@ exports.sendDispatchedInvoicedReport = async function () {
       {
         skipHeader: true,
         origin: "A3",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -192,7 +190,7 @@ exports.sendDispatchedInvoicedReport = async function () {
       {
         skipHeader: true,
         origin: "A5",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(ReportHeader, finalResult, { skipHeader: true, origin: "A6" });
@@ -211,10 +209,18 @@ exports.sendDispatchedInvoicedReport = async function () {
 
     await sendMail(
       "sales@vans-electronics.com",
-      ["aman.mandal@mscorpres.in","neetu@vans-electronics.com","storevans@mscorpres.com","store@vans-electronics.com","namneet@silicon-india.com","accounts@vans-electronics.com","accounts@navsinternational.com"],
+      [
+        "aman.mandal@mscorpres.in",
+        "neetu@vans-electronics.com",
+        "storevans@mscorpres.com",
+        "store@vans-electronics.com",
+        "namneet@silicon-india.com",
+        "accounts@vans-electronics.com",
+        "accounts@navsinternational.com",
+      ],
       "Dispatched & Invoiced Summary Report [File Ready for download] Ref:" + randomNumber(),
-      htmlTemplate("User", new Date(), "Dispatched & Invoiced Summary", "https://socketv2.mscapi.live/" + fileName),
-      attachment
+      htmlTemplate("User", new Date(), "Dispatched & Invoiced Summary", "https://vans.ws.mscorpres.com" + fileName),
+      attachment,
     );
     console.log(`Email sent with attachment ${fileName}`);
   } catch (error) {

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { otherDB, invtDB } = require("./../../config/db/connection");
+const { vansOtherDB, vansDB } = require("./../../config/db/connection");
 exports.push = function (io, socket) {
 	// PUSH NOTIFICATION
 	socket.on("push_notify", async (data) => {
@@ -8,14 +8,14 @@ exports.push = function (io, socket) {
 			console.log("check", check.crn_id);
 
 			if (check.crn_id) {
-				let result = await invtDB.query("SELECT * FROM `admin_login` WHERE `CustID` = :data AND type = 'developer'", {
+				let result = await vansDB.query("SELECT * FROM `admin_login` WHERE `CustID` = :data AND type = 'developer'", {
 					replacements: { data: check.crn_id },
-					type: invtDB.QueryTypes.SELECT,
+					type: vansDB.QueryTypes.SELECT,
 				});
 				if (result.length === 0) {
 					return io.emit(`${setData.page}`, { message: "User not found", code: 404, user: "Not Developer" });
 				} else {
-					let result = await otherDB.query(
+					let result = await vansOtherDB.query(
 						"INSERT INTO `user_files_req` (`request_txt_label`, `req_code`, `user_id`, `msg_type`, `status`, `other_data`, `insert_date`) VALUES( :txt_label, :req_code, :user_id, :msg_type, :status, :other_data, :insert_date )",
 						{
 							replacements: {
@@ -30,7 +30,7 @@ exports.push = function (io, socket) {
 								}),
 								insert_date: moment(new Date()).tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
 							},
-							type: otherDB.QueryTypes.INSERT,
+							type: vansOtherDB.QueryTypes.INSERT,
 						}
 					);
 					if (result.length > 0) {

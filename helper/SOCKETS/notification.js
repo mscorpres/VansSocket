@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { otherDB, vansOtherDB } = require("./../../config/db/connection");
+const { vansOtherDB } = require("./../../config/db/connection");
 const moment = require("moment");
 
 exports.notification = function (io, socket) {
@@ -15,18 +15,18 @@ exports.notification = function (io, socket) {
         query += modules.map(module => `'${module}'`).join(', ');
         query += ") ORDER BY `ID` DESC";
 
-        let stmt_0 = await otherDB.query(query, {
+        let stmt_0 = await vansOtherDB.query(query, {
           replacements: {
             user_id: user_id
           },
-          type: otherDB.QueryTypes.SELECT,
+          type: vansOtherDB.QueryTypes.SELECT,
         });
 		  
         let final_data = [];
         if (stmt_0.length > 0) {
-          let stmt_1 = await otherDB.query("SELECT COUNT(CASE WHEN `msg_type` LIKE 'msg' THEN 0 END) AS `push_msg`, COUNT(CASE WHEN `msg_type` LIKE 'file' THEN 0 END) AS `file_msg`, COUNT(CASE WHEN `msg_type` LIKE 'btn' THEN 0 END) AS `btn_msg` FROM `user_files_req` WHERE `user_id` = :user_id ORDER BY `ID` DESC", {
+          let stmt_1 = await vansOtherDB.query("SELECT COUNT(CASE WHEN `msg_type` LIKE 'msg' THEN 0 END) AS `push_msg`, COUNT(CASE WHEN `msg_type` LIKE 'file' THEN 0 END) AS `file_msg`, COUNT(CASE WHEN `msg_type` LIKE 'btn' THEN 0 END) AS `btn_msg` FROM `user_files_req` WHERE `user_id` = :user_id ORDER BY `ID` DESC", {
             replacements: { user_id: user_id },
-            type: otherDB.QueryTypes.SELECT,
+            type: vansOtherDB.QueryTypes.SELECT,
           });
           for (let i = 0; i < stmt_0.length; i++) {
             final_data.push({

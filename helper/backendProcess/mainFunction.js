@@ -1,11 +1,11 @@
 const ev = require('email-mx-validator');
-const { otherDB } = require('../../config/db/connection');
+const { vansOtherDB } = require('../../config/db/connection');
 const { sendMail } = require('../helper');
 
 const sendAdminMail = async () => {
     try {
-        let stmt = await otherDB.query("SELECT * FROM mails_log WHERE status = 'pending'", {
-            type: otherDB.QueryTypes.SELECT,
+        let stmt = await vansOtherDB.query("SELECT * FROM mails_log WHERE status = 'pending'", {
+            type: vansOtherDB.QueryTypes.SELECT,
         });
         if (stmt.length > 0) {
             for (let i = 0; i < stmt.length; i++) {
@@ -24,12 +24,12 @@ const sendAdminMail = async () => {
                             let result = await sendMail(stmt[i].mail_to, null, stmt[i].subject, stmt[i].message);
 
                             if (result.code == 200) {
-                                let stmt2 = await otherDB.query("UPDATE mails_log SET status = 'success' , mail_sent_dt = :date  WHERE mail_to = :mailTo", {
+                                let stmt2 = await vansOtherDB.query("UPDATE mails_log SET status = 'success' , mail_sent_dt = :date  WHERE mail_to = :mailTo", {
                                     replacements: {
                                         date: new Date(),
                                         mailTo: stmt[i].mail_to,
                                     },
-                                    type: otherDB.QueryTypes.UPDATE,
+                                    type: vansOtherDB.QueryTypes.UPDATE,
                                 });
                             }
                             console.log(result);

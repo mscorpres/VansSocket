@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 const jwt = require("jsonwebtoken");
-const { otherDB, invtDB } = require("./../../config/db/connection");
+const { vansOtherDB, vansDB } = require("./../../config/db/connection");
 
 exports.page_status = function (io, socket) {
 	// Set Page status
@@ -16,9 +16,9 @@ exports.page_status = function (io, socket) {
 			};
 
 			if (check.crn_id) {
-				let result = await invtDB.query("SELECT * FROM `admin_login` WHERE `CustID` = :data AND type = 'developer'", {
+				let result = await vansDB.query("SELECT * FROM `admin_login` WHERE `CustID` = :data AND type = 'developer'", {
 					replacements: { data: check.crn_id },
-					type: invtDB.QueryTypes.SELECT,
+					type: vansDB.QueryTypes.SELECT,
 				});
 				if (result.length === 0) {
 					return socket.emit(`${setData.page}`, (data = { message: "User not found", code: 404, user: "Not Developer" }));
@@ -53,9 +53,9 @@ exports.page_status = function (io, socket) {
 			// let check = await verifyToken(`${socket.handshake.auth.token}`);
 			// console.log("check", check.crn_id);
 
-			// let result = await invtDB.query("SELECT CustID,type FROM `admin_login` WHERE `CustID` = :data", {
+			// let result = await vansDB.query("SELECT CustID,type FROM `admin_login` WHERE `CustID` = :data", {
 			//   replacements: { data: check.crn_id },
-			//   type: invtDB.QueryTypes.SELECT,
+			//   type: vansDB.QueryTypes.SELECT,
 			// });
 
 			// read the json file
@@ -92,9 +92,9 @@ exports.page_status = function (io, socket) {
 			let company_id = token_res.company_id;
 			let user_id = token_res.crn_id;
 
-			let stmt = await otherDB.query(`SELECT * FROM ${global.oakter_db_invt}.admin_login invt LEFT JOIN ${global.oakter_db_other}.ims_company other ON invt.company_id = other.company_id WHERE invt.CustID = :user_id`, {
+			let stmt = await vansOtherDB.query(`SELECT * FROM ${global.vans_db_ims}.admin_login invt LEFT JOIN ${global.vans_db_other}.ims_company other ON invt.company_id = other.company_id WHERE invt.CustID = :user_id`, {
 				replacements: { company_id: company_id, user_id: user_id },
-				type: otherDB.QueryTypes.SELECT,
+				type: vansOtherDB.QueryTypes.SELECT,
 			});
 			if (stmt.length > 0) {
 				if (stmt[0].company_server !== "ON" && stmt[0].type !== "developer") {

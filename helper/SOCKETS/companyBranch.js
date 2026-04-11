@@ -1,4 +1,4 @@
-const { otherDB, invtDB } = require("./../../config/db/connection");
+const { vansOtherDB } = require("./../../config/db/connection");
 const jwt = require("jsonwebtoken");
 const { randomNumber, getUniqueNumber } = require("../helper");
 exports.companyBranch = async function (io, socket) {
@@ -9,35 +9,35 @@ exports.companyBranch = async function (io, socket) {
 
     socket.join(user_id);
     socket.on("getBranch", async (data) => {
-      const existingUser = await otherDB.query(
+      const existingUser = await vansOtherDB.query(
         "SELECT user FROM user_company_branch where `user` = :user",
         {
           replacements: {
             user: user_id,
           },
-          type: otherDB.QueryTypes.SELECT,
+          type: vansOtherDB.QueryTypes.SELECT,
         }
       );
       if (existingUser[0]) {
-        const stmt = await otherDB.query(
+        const stmt = await vansOtherDB.query(
           "UPDATE user_company_branch SET `branch` = :branch WHERE `user` = :user",
           {
             replacements: {
               user: user_id,
               branch: data,
             },
-            type: otherDB.QueryTypes.UPDATE,
+            type: vansOtherDB.QueryTypes.UPDATE,
           }
         );
       } else {
-        const stmt = await otherDB.query(
+        const stmt = await vansOtherDB.query(
           "INSERT INTO `user_company_branch` (`user`,`branch`) VALUES (:user, :branch)",
           {
             replacements: {
               user: user_id,
               branch: data,
             },
-            type: otherDB.QueryTypes.INSERT,
+            type: vansOtherDB.QueryTypes.INSERT,
           }
         );
       }

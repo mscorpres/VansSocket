@@ -1,7 +1,7 @@
 
 const cron = require("node-cron");
 const moment = require("moment");
-const { otherDB } = require("../config/db/connection");
+const { vansOtherDB } = require("../config/db/connection");
 const { error_log } = require("../helper/utils");
 const fs = require("fs")
 const path = require("path");
@@ -82,22 +82,22 @@ async function deleteOldFiles() {
     const twelveHoursAgo = moment().subtract(12, "hours").format("YYYY-MM-DD HH:mm:ss");
     
     // First, count how many records will be deleted
-    const countResult = await otherDB.query(
+    const countResult = await vansOtherDB.query(
       "SELECT COUNT(*) as count FROM `user_files_req` WHERE `insert_date` < :twelveHoursAgo",
       {
         replacements: { twelveHoursAgo: twelveHoursAgo },
-        type: otherDB.QueryTypes.SELECT,
+        type: vansOtherDB.QueryTypes.SELECT,
       }
     );
     
     const deletedCount = countResult[0]?.count || 0;
     
     // Delete records older than 12 hours from database
-    await otherDB.query(
+    await vansOtherDB.query(
       "DELETE FROM `user_files_req` WHERE `insert_date` < :twelveHoursAgo",
       {
         replacements: { twelveHoursAgo: twelveHoursAgo },
-        type: otherDB.QueryTypes.DELETE,
+        type: vansOtherDB.QueryTypes.DELETE,
       }
     );
     

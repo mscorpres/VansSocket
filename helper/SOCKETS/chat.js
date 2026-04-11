@@ -1,4 +1,4 @@
-const { otherDB, invtDB } = require("./../../config/db/connection");
+const { vansOtherDB } = require("./../../config/db/connection");
 const jwt = require("jsonwebtoken");
 const { randomNumber, getUniqueNumber } = require("../helper");
 var users = {};
@@ -42,11 +42,11 @@ exports.chat = async function (io, socket) {
   });
 
   async function fetch_sender_chats(user_id, sender_id) {
-    let stmt = await otherDB.query(
+    let stmt = await vansOtherDB.query(
       "SELECT fname,img,incoming_msg_id,msg,outgoing_msg_id,status FROM ims_chat_logs LEFT JOIN users ON users.unique_id = ims_chat_logs.outgoing_msg_id WHERE (outgoing_msg_id = :sender_id  AND incoming_msg_id = :uid ) OR (outgoing_msg_id = :uid AND incoming_msg_id = :sender_id ) ORDER BY msg_id",
       {
         replacements: { uid: user_id, sender_id: sender_id },
-        type: otherDB.QueryTypes.SELECT,
+        type: vansOtherDB.QueryTypes.SELECT,
       }
     );
     if (stmt.length > 0) {
@@ -82,11 +82,11 @@ exports.chat = async function (io, socket) {
 //   try {
 //     token_res = await verifyToken(`${socket.handshake.auth.token}`);
 //     let user_id = token_res.crn_id;
-//     let stmt = await otherDB.query(
+//     let stmt = await vansOtherDB.query(
 //       "SELECT * FROM users WHERE NOT unique_id = :uid ORDER BY user_id DESC",
 //       {
 //         replacements: { uid: user_id },
-//         type: otherDB.QueryTypes.SELECT,
+//         type: vansOtherDB.QueryTypes.SELECT,
 //       }
 //     );
 //     // console.log(stmt);
@@ -107,11 +107,11 @@ exports.chat = async function (io, socket) {
 //     token_res = await verifyToken(`${socket.handshake.auth.token}`);
 //     let user_id = token_res.crn_id;
 //     console.log(token_res.crn_id);
-//     let stmt = await otherDB.query(
+//     let stmt = await vansOtherDB.query(
 //       "SELECT fname,img,incoming_msg_id,msg,outgoing_msg_id,status FROM ims_chat_logs LEFT JOIN users ON users.unique_id = ims_chat_logs.outgoing_msg_id WHERE (outgoing_msg_id = :sender_id  AND incoming_msg_id = :uid ) OR (outgoing_msg_id = :uid AND incoming_msg_id = :sender_id ) ORDER BY msg_id",
 //       {
 //         replacements: { uid: user_id, sender_id: sender_id },
-//         type: otherDB.QueryTypes.SELECT,
+//         type: vansOtherDB.QueryTypes.SELECT,
 //       }
 //     );
 //     if (stmt.length > 0) {

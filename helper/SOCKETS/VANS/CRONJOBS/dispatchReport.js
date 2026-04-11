@@ -8,7 +8,7 @@ const fs = require("fs");
 exports.sendDispatchReport = async function () {
   console.log(`Starting sendDispatchReport at ${moment().format("YYYY-MM-DD HH:mm:ss")}`);
   try {
-    const ReportDate = moment(new Date()).subtract(1, 'days').format("YYYY-MM-DD");
+    const ReportDate = moment(new Date()).subtract(1, "days").format("YYYY-MM-DD");
     let fileName = `files/excel/DISPATCH${Math.floor(Math.random() * (999 - 100 + 1)) + 100}.csv`;
 
     console.log(`Generating dispatch report for YESTERDAY's date: ${ReportDate}, file: ${fileName}`);
@@ -42,7 +42,7 @@ exports.sendDispatchReport = async function () {
       {
         replacements: { date: ReportDate },
         type: vansDB.QueryTypes.SELECT,
-      }
+      },
     );
     console.log(`Fetched ${stmt.length} records from rm_location`);
 
@@ -61,7 +61,7 @@ exports.sendDispatchReport = async function () {
         {
           replacements: { pickslip_no: item.out_transaction_id, comp: item.components_id },
           type: vansDB.QueryTypes.SELECT,
-        }
+        },
       );
 
       let total_part_qty = 0;
@@ -109,7 +109,7 @@ exports.sendDispatchReport = async function () {
       {
         header: ["A"],
         skipHeader: true,
-      }
+      },
     );
 
     ReportHeader["!merges"] = [
@@ -128,7 +128,7 @@ exports.sendDispatchReport = async function () {
       {
         skipHeader: true,
         origin: "A2",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -141,7 +141,7 @@ exports.sendDispatchReport = async function () {
       {
         skipHeader: true,
         origin: "A3",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -165,7 +165,7 @@ exports.sendDispatchReport = async function () {
       {
         skipHeader: true,
         origin: "A5",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(ReportHeader, finalResult, { skipHeader: true, origin: "A6" });
@@ -184,10 +184,18 @@ exports.sendDispatchReport = async function () {
 
     await sendMail(
       "sales@vans-electronics.com",
-      ["aman.mandal@mscorpres.in","neetu@vans-electronics.com","storevans@mscorpres.com","store@vans-electronics.com","namneet@silicon-india.com","accounts@vans-electronics.com","accounts@navsinternational.com"],
+      [
+        "aman.mandal@mscorpres.in",
+        "neetu@vans-electronics.com",
+        "storevans@mscorpres.com",
+        "store@vans-electronics.com",
+        "namneet@silicon-india.com",
+        "accounts@vans-electronics.com",
+        "accounts@navsinternational.com",
+      ],
       "Dispatch Report [File Ready for download] Ref:" + randomNumber(),
-      htmlTemplate("User", new Date(), "Ready for Dispatch", "https://socketv2.mscapi.live/" + fileName),
-      attachment
+      htmlTemplate("User", new Date(), "Ready for Dispatch", "https://vans.ws.mscorpres.com" + fileName),
+      attachment,
     );
     console.log(`Email sent to aman.mandal@mscorpres.in with attachment ${fileName}`);
   } catch (error) {

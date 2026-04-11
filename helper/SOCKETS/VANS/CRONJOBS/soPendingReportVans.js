@@ -73,10 +73,7 @@ exports.sendSOPendingReport = async function () {
     }
 
     for (let row of stmt) {
-      let cost_center =
-        row.cost_center_name && row.cost_center_short_name
-          ? `${row.cost_center_name} (${row.cost_center_short_name})`
-          : "N/A";
+      let cost_center = row.cost_center_name && row.cost_center_short_name ? `${row.cost_center_name} (${row.cost_center_short_name})` : "N/A";
 
       finalResult.push({
         SO_ID: row.so_id || "N/A",
@@ -116,7 +113,7 @@ exports.sendSOPendingReport = async function () {
       {
         header: ["A"],
         skipHeader: true,
-      }
+      },
     );
 
     ReportHeader["!merges"] = [
@@ -135,7 +132,7 @@ exports.sendSOPendingReport = async function () {
       {
         skipHeader: true,
         origin: "A2",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -148,7 +145,7 @@ exports.sendSOPendingReport = async function () {
       {
         skipHeader: true,
         origin: "A3",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(
@@ -181,7 +178,7 @@ exports.sendSOPendingReport = async function () {
       {
         skipHeader: true,
         origin: "A5",
-      }
+      },
     );
 
     xlsx.utils.sheet_add_json(ReportHeader, finalResult, { skipHeader: true, origin: "A6" });
@@ -206,11 +203,19 @@ exports.sendSOPendingReport = async function () {
     ];
 
     await sendMail(
-       "sales@vans-electronics.com",
-       ["aman.mandal@mscorpres.in","neetu@vans-electronics.com","storevans@mscorpres.com","store@vans-electronics.com","namneet@silicon-india.com","accounts@vans-electronics.com","accounts@navsinternational.com"],
+      "sales@vans-electronics.com",
+      [
+        "aman.mandal@mscorpres.in",
+        "neetu@vans-electronics.com",
+        "storevans@mscorpres.com",
+        "store@vans-electronics.com",
+        "namneet@silicon-india.com",
+        "accounts@vans-electronics.com",
+        "accounts@navsinternational.com",
+      ],
       "SO Pending Report - All Pending [File Ready for download] Ref:" + randomNumber(),
-      htmlTemplate("User", new Date(), "SO Pending (All)", "https://socketv2.mscapi.live/" + fileName),
-      attachment
+      htmlTemplate("User", new Date(), "SO Pending (All)", "https://vans.ws.mscorpres.com" + fileName),
+      attachment,
     );
     console.log(`Email sent with ALL pending SO report attachment ${fileName}`);
   } catch (error) {
