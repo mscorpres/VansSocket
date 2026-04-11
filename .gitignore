@@ -1,0 +1,10 @@
+node_modules
+files
+files/*
+logs
+logs/*
+tmp/*
+certificate/*
+access.log
+.env
+config/*
