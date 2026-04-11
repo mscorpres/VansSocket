@@ -1,7 +1,7 @@
 module.exports = {
 	apps: [
 		{
-			name: "Socket",
+			name: "VansSocket",
 			script: "app.js",
 			watch: ["./routes"],
 			watch_delay: 500,
