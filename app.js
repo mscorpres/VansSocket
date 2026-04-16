@@ -50,11 +50,7 @@ app.use(nocache());
 // Initialize CORS
 corsOptions = {
   origin: [
-    "https://vans.mscorpres.co.in",
-    "https://vans.mscorpres.net",
-    "https://dev.mscorpres.net",
-    "https://ims.mscorpres.co.in",
-    "https://dev.mscorpres.co.in",
+    "https://vans.mscorpres.com"
   ],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   methods: ["GET,HEAD,PUT,PATCH,POST,DELETE"],
@@ -62,7 +58,7 @@ corsOptions = {
 app.use(cors(corsOptions));
 
 app.get("/", function (req, res) {
-  return res.send("<h2>WELCOME : socket2</h2>");
+  return res.send("<h2>WELCOME : Vans Socket</h2>");
 });
 
 // catch 404 and forward to error handler
@@ -82,7 +78,7 @@ app.use("/files", require("./helper/backendProcess/TruncateDownloadedFiles"));
 const port = process.env.PORT;
 
 //with http://
-const node_server = http
+const node_server = https
   .createServer(https_options, app, () => {
     timeout = 6000000; // Miliseconds
   })
