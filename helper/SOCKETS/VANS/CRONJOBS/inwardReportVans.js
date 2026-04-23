@@ -145,7 +145,7 @@ exports.sendIwardReport = async function () {
 
     await sendMail(
       "sales@vans-electronics.com",
-      ["aman.mandal@mscorpres.in", "neetu@vans-electronics.com", "storevans@mscorpres.com", "store@vans-electronics.com", "purchase@vans-electronics.com"],
+      ["aman.mandal@mscorpres.in", "neetu@vans-electronics.com", "dispatch@vans-electronics.com", "store@vans-electronics.com", "purchase@vans-electronics.com"],
       "Inward Report [File Ready for download] Ref:" + randomNumber(),
       htmlTemplate("User", new Date(), "Inward", "https://vans.ws.mscorpres.com" + fileName),
       attachment,

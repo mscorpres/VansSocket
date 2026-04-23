@@ -29,7 +29,7 @@ exports.sendMinStockAlert = async function () {
       LEFT JOIN units ON units.units_id = components.c_uom
       WHERE components.c_notification = 'Y'
       ORDER BY components.c_part_no ASC`,
-      { type: vansDB.QueryTypes.SELECT }
+      { type: vansDB.QueryTypes.SELECT },
     );
 
     console.log(`Query returned ${stmt.length} components with notification enabled`);
@@ -44,21 +44,21 @@ exports.sendMinStockAlert = async function () {
 
     //  Process each component individually and send separate emails
     console.log("Processing components and sending individual email alerts...");
-    
+
     for (let i = 0; i < stmt.length; i++) {
       const component = stmt[i];
       componentsProcessed++;
-      
-      // Calculate total stock exactly 
+
+      // Calculate total stock exactly
       const navStock = Number(component.c_closing_stock) || 0;
       const vansStock = Number(component.c_closing_stock_vans) || 0;
       const siliconStock = Number(component.c_closing_stock_silicon) || 0;
       const totalStock = navStock + vansStock + siliconStock;
-      
+
       // Get minimum stock threshold
       const minStockFromDB = Number(component.c_min_stock) || 0;
-      
-      //Skip if c_min_stock is not set (0 or null) 
+
+      //Skip if c_min_stock is not set (0 or null)
       if (minStockFromDB <= 0) {
         console.log(`Skipping ${component.c_part_no} - No minimum stock set`);
         continue;
@@ -74,14 +74,12 @@ exports.sendMinStockAlert = async function () {
         //Create individual Excel file for this component
         const fileName = `files/excel/MIN_STOCK_ALERT_${component.c_part_no}_${randomNumber()}.xlsx`;
 
-    
         const dir = "files/excel";
         if (!fs.existsSync(dir)) {
           fs.mkdirSync(dir, { recursive: true });
           console.log(`Created directory: ${dir}`);
         }
 
-        
         const componentData = {
           PART_CODE: component.c_part_no || "N/A",
           PART_NAME: component.c_name || "N/A",
@@ -99,14 +97,11 @@ exports.sendMinStockAlert = async function () {
           SOQ: component.c_soq_qty || "N/A",
           SHORTAGE_QTY: shortage,
           SHORTAGE_PERCENT: `${shortagePercent}%`,
-          STATUS: totalStock <= 0 ? "OUT OF STOCK" : "BELOW MINIMUM"
+          STATUS: totalStock <= 0 ? "OUT OF STOCK" : "BELOW MINIMUM",
         };
 
         //Create Excel report for individual component
-        const ReportHeader = xlsx.utils.json_to_sheet(
-          [{ A: `⚠️ MINIMUM STOCK ALERT - ${component.c_part_no}` }],
-          { header: ["A"], skipHeader: true }
-        );
+        const ReportHeader = xlsx.utils.json_to_sheet([{ A: `⚠️ MINIMUM STOCK ALERT - ${component.c_part_no}` }], { header: ["A"], skipHeader: true });
 
         ReportHeader["!merges"] = [
           { s: { r: 0, c: 0 }, e: { r: 0, c: 16 } },
@@ -115,10 +110,12 @@ exports.sendMinStockAlert = async function () {
 
         xlsx.utils.sheet_add_json(
           ReportHeader,
-          [{ 
-            A: `Generated: ${moment().format("DD-MM-YYYY HH:mm:ss")} | Component: ${component.c_part_no}` 
-          }],
-          { skipHeader: true, origin: "A2" }
+          [
+            {
+              A: `Generated: ${moment().format("DD-MM-YYYY HH:mm:ss")} | Component: ${component.c_part_no}`,
+            },
+          ],
+          { skipHeader: true, origin: "A2" },
         );
 
         xlsx.utils.sheet_add_json(
@@ -144,7 +141,7 @@ exports.sendMinStockAlert = async function () {
               Q: "STATUS",
             },
           ],
-          { skipHeader: true, origin: "A4" }
+          { skipHeader: true, origin: "A4" },
         );
 
         xlsx.utils.sheet_add_json(ReportHeader, [componentData], {
@@ -177,7 +174,6 @@ exports.sendMinStockAlert = async function () {
         xlsx.writeFile(workbook, fileName);
         console.log(`Excel file created: ${fileName}`);
 
-      
         const attachment = [
           {
             filename: `MIN_STOCK_ALERT_${component.c_part_no}_${moment().format("DDMMYYYY_HHmmss")}.xlsx`,
@@ -185,7 +181,6 @@ exports.sendMinStockAlert = async function () {
           },
         ];
 
-       
         const alertHtml = `
           <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -257,14 +252,13 @@ exports.sendMinStockAlert = async function () {
           </html>
         `;
 
-       
         try {
           await sendMail(
             "sales@vans-electronics.com",
-            ["aman.mandal@mscorpres.in","neetu@vans-electronics.com","storevans@mscorpres.com","store@vans-electronics.com","namneet@silicon-india.com"],
+            ["aman.mandal@mscorpres.in", "neetu@vans-electronics.com", "dispatch@vans-electronics.com", "store@vans-electronics.com", "namneet@silicon-india.com"],
             `STOCK ALERT: ${component.c_part_no} - Below Minimum - ${moment().format("DD-MM-YYYY")}`,
             alertHtml,
-            attachment
+            attachment,
           );
 
           emailsSentCount++;
@@ -273,7 +267,6 @@ exports.sendMinStockAlert = async function () {
           console.error(`✗ Failed to send email for ${component.c_part_no}:`, emailError.message);
         }
 
-      
         setTimeout(() => {
           if (fs.existsSync(fileName)) {
             fs.unlinkSync(fileName);
@@ -283,9 +276,8 @@ exports.sendMinStockAlert = async function () {
 
         //  Add small delay between emails to avoid overwhelming mail server
         if (i < stmt.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
-
       } else {
         console.log(`OK: ${component.c_part_no} | Total Stock: ${totalStock} >= Min Stock: ${minStockFromDB}`);
       }
@@ -295,7 +287,6 @@ exports.sendMinStockAlert = async function () {
     console.log(`Components Processed: ${componentsProcessed}`);
     console.log(`Emails Sent: ${emailsSentCount}`);
     console.log(`Completed at ${moment().format("YYYY-MM-DD HH:mm:ss")}`);
-
   } catch (error) {
     console.error(`Error in sendMinStockAlert: ${error.message}`, error.stack);
   }

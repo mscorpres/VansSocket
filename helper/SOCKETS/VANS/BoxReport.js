@@ -533,6 +533,28 @@ exports.stockPart = async function (io, socket) {
         type: vansDB.QueryTypes.SELECT,
       });
 
+      // Get latest box location remarks from physical stock table
+      const boxLocationQuery = await vansDB.query(`
+        SELECT
+          ps.part_name,
+          ps.box_no,
+          ps.remark
+        FROM physical_stock ps
+        INNER JOIN (
+          SELECT
+            part_name,
+            box_no,
+            MAX(insert_date) AS max_insert_date
+          FROM physical_stock
+          GROUP BY part_name, box_no
+        ) latest_ps
+          ON latest_ps.part_name = ps.part_name
+          AND latest_ps.box_no = ps.box_no
+          AND latest_ps.max_insert_date = ps.insert_date
+      `, {
+        type: vansDB.QueryTypes.SELECT,
+      });
+
       // Create lookup maps for O(1) access
       const lastRatesMap = new Map();
       lastRatesQuery.forEach(row => {
@@ -551,6 +573,12 @@ exports.stockPart = async function (io, socket) {
       const lastOutwardMap = new Map();
       lastOutwardDatesQuery.forEach(row => {
         lastOutwardMap.set(row.components_id, row.insert_date);
+      });
+
+      const boxLocationMap = new Map();
+      boxLocationQuery.forEach(row => {
+        const locationKey = `${row.box_no || ""}__${row.part_name || ""}`;
+        boxLocationMap.set(locationKey, row.remark || "");
       });
 
       // Process results
@@ -580,10 +608,13 @@ exports.stockPart = async function (io, socket) {
 
         const lasttIN = lastInDate ? moment(lastInDate).format("DD-MM-YYYY") : "N/A";
         const lasttOUT = lastOutDate ? moment(lastOutDate).format("DD-MM-YYYY") : "N/A";
+        const locationKey = `${row.loc_in || ""}__${row.c_part_no || ""}`;
+        const boxLocation = boxLocationMap.get(locationKey) || "";
 
         finalResult.push({
           COST_CENTER: row.cost_center_name || "",
-          LOCATION: row.loc_in || "",
+          BOX: row.loc_in || "",
+          BOX_LOCATION: boxLocation,
           PART: row.c_part_no || "",
           NAME: row.c_name || "",
           DESC: row.c_specification || "",
@@ -602,7 +633,8 @@ exports.stockPart = async function (io, socket) {
       // Add summary row
       finalResult.push({
         COST_CENTER: "",
-        LOCATION: "TOTAL BOXES",
+        BOX : "TOTAL BOXES",
+        BOX_LOCATION: "",
         PART: total_box.size,
         NAME: "",
         DESC: "",
@@ -652,9 +684,9 @@ exports.stockPart = async function (io, socket) {
 
       // Add headers
       xlsx.utils.sheet_add_json(ReportHeader, [{
-        A9: "COST_CENTER", B9: "LOCATION", C9: "PART", D9: "NAME", E9: "DESC",
-        F9: "MAKE", G9: "UNIT", H9: "RATE", I9: "CLOSING_QUANTITY", J9: "AMOUNT_LC",
-        K9: "AMOUNT_FC", L9: "MIN_NO", M9: "LAST_IN", N9: "LAST_OUT",
+        A9: "COST_CENTER", B9: "BOX", C9: "BOX_LOCATION", D9: "PART", E9: "NAME", F9: "DESC",
+        G9: "MAKE", H9: "UNIT", I9: "RATE", J9: "CLOSING_QUANTITY", K9: "AMOUNT_LC",
+        L9: "AMOUNT_FC", M9: "MIN_NO", N9: "LAST_IN", O9: "LAST_OUT",
       }], { skipHeader: true, origin: "A9" });
 
       // Add data

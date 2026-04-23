@@ -184,8 +184,8 @@ exports.sendPendingPOReport = async function () {
     ];
 
     await sendMail(
-      "aman.mandal@mscorpres.in",
-      ["aman.mandal@mscorpres.in"],
+      "sales@vans-electronics.com",
+      ["aman.mandal@mscorpres.in","neetu@vans-electronics.com","purchase@vans-electronics.com","dispatch@vans-electronics.com","store@vans-electronics.com"],
       "Pending PO Report [File Ready for download] Ref:" + randomNumber(),
       htmlTemplate("User", new Date(), "Pending PO", "https://vans.ws.mscorpres.com" + fileName),
       attachment,

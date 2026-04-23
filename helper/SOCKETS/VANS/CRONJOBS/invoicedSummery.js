@@ -212,7 +212,7 @@ exports.sendDispatchedInvoicedReport = async function () {
       [
         "aman.mandal@mscorpres.in",
         "neetu@vans-electronics.com",
-        "storevans@mscorpres.com",
+        "dispatch@vans-electronics.com",
         "store@vans-electronics.com",
         "namneet@silicon-india.com",
         "accounts@vans-electronics.com",
