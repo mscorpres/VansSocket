@@ -46,9 +46,8 @@ exports.sendPendingPOReport = async function () {
   LEFT JOIN \`ims_currency\` ON \`ims_currency\`.\`currency_id\` = \`po_purchase_req\`.\`po_currency\` 
   WHERE \`components\`.\`c_type\` = 'R'
   AND \`po_purchase_req\`.\`po_status\` = 'A'
-  AND \`po_purchase_req\`.\`po_status\` != 'C'
-  GROUP BY \`po_purchase_req\`.\`po_part_no\`, \`po_purchase_req\`.\`po_transaction\` 
-  HAVING (SUM(\`po_purchase_req\`.\`po_order_qty\`) - SUM(\`po_purchase_req\`.\`po_inward_qty\`)) > 0
+  AND \`po_purchase_req\`.\`po_pending_qty\` > 0
+  GROUP BY \`po_purchase_req\`.\`ID\`
   ORDER BY \`po_purchase_req\`.\`ID\` DESC
 `;
 
